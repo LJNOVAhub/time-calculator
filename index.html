@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Time Card Calculator with Lunch Break | Work Hours</title>
+  <meta name="description" content="Calculate your daily work hours, lunch breaks, and total pay easily. Free online timesheet calculator.">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .container { max-width: 650px; width: 100%; margin: auto; }
+    header { text-align: center; margin-bottom: 25px; }
+    h1 { font-size: 1.8rem; color: #0f172a; margin-bottom: 8px; }
+    p { color: #64748b; font-size: 0.95rem; }
+    
+    /* Ad Banner Placeholder */
+    .ad-slot { width: 100%; background: #e2e8f0; border: 1px dashed #94a3b8; padding: 15px; text-align: center; color: #64748b; font-size: 0.85rem; margin: 15px 0; border-radius: 8px; }
+    
+    .card { background: var(--card); padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; outline: none; }
+    input:focus { border-color: var(--primary); ring: 2px var(--primary); }
+    
+    button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+    button:hover { background: var(--primary-hover); }
+    
+    .result-box { display: none; margin-top: 20px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; text-align: center; }
+    .result-title { font-size: 0.9rem; color: #1e40af; font-weight: 500; }
+    .total-hours { font-size: 2rem; font-weight: 700; color: var(--primary); margin: 5px 0; }
+    .total-pay { font-size: 1.1rem; color: #15803d; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Work Hours & Time Card Calculator</h1>
+      <p>Instant daily hours & earnings calculation. No sign-up required.</p>
+    </header>
+
+    <!-- Top Ad Slot -->
+    <div class="ad-slot">
+      <span>[ Google AdSense Header Banner - 728x90 / Responsive ]</span>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div class="form-group">
+          <label for="startTime">Start Time</label>
+          <input type="time" id="startTime" value="09:00">
+        </div>
+        <div class="form-group">
+          <label for="endTime">End Time</label>
+          <input type="time" id="endTime" value="17:00">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="form-group">
+          <label for="breakMinutes">Break / Lunch (Minutes)</label>
+          <input type="number" id="breakMinutes" value="30" min="0">
+        </div>
+        <div class="form-group">
+          <label for="hourlyRate">Hourly Rate ($) (Optional)</label>
+          <input type="number" id="hourlyRate" placeholder="e.g. 20" min="0" step="0.5">
+        </div>
+      </div>
+
+      <button onclick="calculateHours()">Calculate Total Hours</button>
+
+      <div id="result" class="result-box">
+        <div class="result-title">Total Working Time</div>
+        <div class="total-hours" id="hoursDisplay">0 hrs 0 mins</div>
+        <div class="total-pay" id="payDisplay"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Ad Slot -->
+    <div class="ad-slot">
+      <span>[ Google AdSense In-Content / Native Ad ]</span>
+    </div>
+  </div>
+
+  <script>
+    function calculateHours() {
+      const start = document.getElementById('startTime').value;
+      const end = document.getElementById('endTime').value;
+      const breakMins = parseInt(document.getElementById('breakMinutes').value) || 0;
+      const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+
+      if (!start || !end) {
+        alert("Please select both start and end times.");
+        return;
+      }
+
+      const [startH, startM] = start.split(':').map(Number);
+      const [endH, endM] = end.split(':').map(Number);
+
+      let startTotal = startH * 60 + startM;
+      let endTotal = endH * 60 + endM;
+
+      // Overnight shift support
+      if (endTotal < startTotal) {
+        endTotal += 24 * 60;
+      }
+
+      let netMinutes = endTotal - startTotal - breakMins;
+      if (netMinutes < 0) netMinutes = 0;
+
+      const hours = Math.floor(netMinutes / 60);
+      const mins = netMinutes % 60;
+      const decimalHours = (netMinutes / 60).toFixed(2);
+
+      document.getElementById('hoursDisplay').innerText = `${hours} hrs ${mins} mins (${decimalHours} hrs)`;
+
+      const payDisplay = document.getElementById('payDisplay');
+      if (rate > 0) {
+        const totalEarnings = (decimalHours * rate).toFixed(2);
+        payDisplay.innerText = `Estimated Total Pay: $${totalEarnings}`;
+        payDisplay.style.display = 'block';
+      } else {
+        payDisplay.style.display = 'none';
+      }
+
+      document.getElementById('result').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
